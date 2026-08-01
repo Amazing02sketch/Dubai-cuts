@@ -1,0 +1,58 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('hero-canvas');
+const renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(0,0,3.2);
+
+function resize(){
+  const w = canvas.parentElement.clientWidth;
+  const h = canvas.parentElement.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Gold ball
+const geom = new THREE.SphereGeometry(1, 64, 64);
+const mat = new THREE.MeshStandardMaterial({
+  color:0xD4AF37, metalness:0.7, roughness:0.25, 
+  emissive:0x221100, emissiveIntensity:0.18
+});
+const sphere = new THREE.Mesh(geom, mat);
+scene.add(sphere);
+
+// **NEW** - White dot marker to SEE rotation
+const marker = new THREE.Mesh(
+  new THREE.SphereGeometry(0.14, 16, 16),
+  new THREE.MeshStandardMaterial({color:0xffffff, emissive:0xffffff, emissiveIntensity:0.9})
+);
+marker.position.set(0.92, 0.3, 0.4);
+sphere.add(marker); // sticks to ball
+
+// **NEW** - Gold ring to SEE spin
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(1.08, 0.035, 8, 64),
+  new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.9})
+);
+ring.rotation.x = Math.PI/3;
+sphere.add(ring);
+
+const light1 = new THREE.PointLight(0xFFD700, 2.5, 10);
+light1.position.set(2,2,2); scene.add(light1);
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+
+// Rotation loop - same sequence as before
+let autoRotY = 0.015; // faster visible
+function animate(){
+  requestAnimationFrame(animate);
+  sphere.rotation.y += autoRotY; // <-- THIS rotates
+  sphere.rotation.x = Math.sin(Date.now()*0.0005)*0.12;
+  sphere.position.y = Math.sin(Date.now()*0.0008)*0.1;
+  renderer.render(scene, camera);
+}
+animate();
+</script>
